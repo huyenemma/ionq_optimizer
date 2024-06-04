@@ -13,7 +13,7 @@ class IonQ_Transpiler:
         pm = PassManager()
         pm.append([
             GPI2_Adjoint(), 
-            GPI_Adjoint(), 
+            GPI_Adjoint(),
             CommuteGPI2MS()
         ])
         return pm
@@ -23,9 +23,6 @@ class IonQ_Transpiler:
         ibm_transpiled = transpile(qc, backend=self.backend, optimization_level=3)
         
         # Apply custom optimization passes
-        optimized_dag = self.pass_manager.run(circuit_to_dag(ibm_transpiled))
-        
-        # Convert the optimized DAG back to a QuantumCircuit
-        optimized_circuit = dag_to_circuit(optimized_dag)
+        optimized_circuit = self.pass_manager.run(ibm_transpiled)
         
         return optimized_circuit
