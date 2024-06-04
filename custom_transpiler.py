@@ -1,7 +1,8 @@
+import hashlib
 from qiskit import transpile
 from qiskit.transpiler import PassManager
-from qiskit.converters import dag_to_circuit, circuit_to_dag
-from rewrite_rules import GPI2_Adjoint, GPI_Adjoint, CommuteGPI2MS
+from rewrite_rules import GPI2_Adjoint, GPI_Adjoint, CommuteGPI2MS, CancelFourGPI2
+from qiskit.converters import circuit_to_dag, dag_to_circuit
 
 class IonQ_Transpiler:
     def __init__(self, backend):
@@ -14,15 +15,21 @@ class IonQ_Transpiler:
         pm.append([
             GPI2_Adjoint(), 
             GPI_Adjoint(),
-            CommuteGPI2MS()
+            CommuteGPI2MS(), 
+            CancelFourGPI2()
         ])
         return pm
 
-    def transpile(self, qc):
-        # Transpile with IBM transpiler first
+    def transpile(self, qc):  
+        
         ibm_transpiled = transpile(qc, backend=self.backend, optimization_level=3)
-        
-        # Apply custom optimization passes
-        optimized_circuit = self.pass_manager.run(ibm_transpiled)
-        
+        optimized_circuit = ibm_transpiled
+
+        while True:
+            previous_dag = circuit_to_dag(optimized_circuit)
+            optimized_circuit = self.pass_manager.run(optimized_circuit)
+            if circuit_to_dag(optimized_circuit) == previous_dag:
+                break
+
         return optimized_circuit
+        
