@@ -9,7 +9,6 @@
 ![4 gpi2](img/4gpi2.png)
 
 
-
 ## GPI2 adjoint 
 
 ![2 gpi2](img/2gpi2.png)
